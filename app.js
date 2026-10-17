@@ -710,6 +710,13 @@ window.Origin = {
   state: () => ({ view: currentView, prospects: prospects.length, profiles: EquityModel.profileNames(), companies: [...new Set(prospects.map((p) => p.company))], notEstimated: prospects.filter((p) => !p.equity.estimated).length })
 };
 
+/* In demo mode (the hosted demo, or npm run start:mock) say so, so nobody mistakes the placeholder results for research. */
+if (typeof Dossier !== "undefined") {
+  Dossier.health().then((health) => {
+    if (health?.mock) document.querySelector("#demoBanner").hidden = false;
+  });
+}
+
 document.querySelector("#methodNavLink").addEventListener("click", openMethodology);
 document.querySelector("#methodHeroLink").addEventListener("click", openMethodology);
 document.querySelector("#promptMethod")?.addEventListener("click", openMethodology);

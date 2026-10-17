@@ -230,7 +230,7 @@ The page must be opened **through the server**. Opening `app.html` directly from
 npm test
 ```
 
-All 82 tests use stubbed network calls and temporary folders, so they need no keys and cost nothing.
+All 96 tests use stubbed network calls and temporary folders, so they need no keys and cost nothing.
 
 ### Optional: live check of the email writer
 
@@ -239,6 +239,25 @@ node --env-file=.env tools/check-email-live.js
 ```
 
 Makes two real model calls on a **fictional** dossier so you can read the model's output. Uses a little of your API credit.
+
+### Deploy a hosted demo to Vercel (optional)
+
+Vercel can host a **demo-only** copy of Origin: the static site plus small serverless functions that always run in mock mode. Visitors can try the sample data and see synthetic research results and email drafts. **No API keys, no live lookups and no real people are involved**, and the demo shows a banner saying so. (The full live app needs a long-running server and a login, so it is not supported on Vercel. Run it locally with `npm start`.)
+
+1. **Commit and push** the project to GitHub. A private repository is fine. `private/`, `.env` and `logs/` are git-ignored and never leave your machine.
+2. On [vercel.com](https://vercel.com), choose **Add New, then Project**, and import the repository.
+3. Leave the settings as detected: `vercel.json` already sets the build command (`node tools/build-demo.js`), the output folder (`public`) and the security headers. **You do not need to add any environment variables.**
+4. Press **Deploy**. When it finishes, open `https://<your-project>.vercel.app`. The landing page is at `/` and the dashboard at `/app.html`.
+5. Check it: the yellow demo banner shows, **Try the sample data** works, **Initiate outreach** returns a synthetic dossier after about five seconds, and `/api/health` shows `"mock": true`.
+
+Prefer the command line? Run `npm install -g vercel`, then `vercel login`, `vercel` (a preview) and `vercel --prod`. `.vercelignore` keeps private files out of the upload.
+
+Good to know:
+- The demo functions delete any keys found in their environment and refuse to start unless mock mode is on, so a settings mistake cannot make the public demo run live research.
+- Anyone can open the URL. Visitors' own files are read only in their browser, but tell them to use fictional data. To limit access, use Vercel's Deployment Protection settings (availability depends on your plan) or a custom domain with your own login in front.
+- Vercel's free Hobby plan is intended for personal, non-commercial use. Check their current terms before using it to show investors.
+- `npm run build:demo` builds the same `public/` folder locally so you can inspect exactly what would be published (16 files).
+
 
 ### Troubleshooting
 
@@ -358,7 +377,7 @@ Run these while the server is idle. Honouring a request also means removing the 
 
 ### Testing done
 
-**Automated (`npm test`): 82 tests across 9 files, no keys or network required.**
+**Automated (`npm test`): 96 tests across 10 files, no keys or network required.**
 
 | File | Tests | What it covers |
 |------|-------|----------------|
@@ -370,6 +389,7 @@ Run these while the server is idle. Honouring a request also means removing the 
 | `tests/model.test.js` | 16 | **The model starts empty** (no built-in company data; an unknown company is n/a); **the fictional sample** (14 numbered people, 2 companies, one impossible date, flags for the founder and the early hire); the **company-profile mechanism** (data-driven vesting, valid and invalid profiles with readable reasons, prototype-name tricks, explicit levels in titles, role-band overrides, seniority ordering); impossible start dates are never estimated |
 | `tests/server.test.js` | 6 | **The upload-first flow**: no bundled prospect-list file exists in the app; the page opens with two upload sections (prospects first, then company profiles) where the loading animation starts; **there is no Skip animation or Simulate loading button**; loading data starts the animation; the server serves the sample pack and both templates but refuses private files, `.env`, server code and path tricks; the sample and templates contain no real-looking data |
 | `tests/import.test.js` | 4 | **The CSV importer**: cleaning, duplicates and incomplete names; its output loads back through the same loader; it writes only where you say (default: the git-ignored `private/` folder) and never inside the app |
+| `tests/vercel.test.js` | 14 | **The hosted demo**: `vercel.json` carries the same security headers as the local server; the build publishes exactly the whitelisted files and refuses to delete the project; the demo functions **always run in mock mode, strip any API keys from their process, make no network calls, and refuse to start if the server was loaded in live mode**; the same-site check works over HTTPS and still rejects other sites; request bodies are read correctly whether the host pre-parses them or not; the page shows a demo banner |
 | `tests/pdf.test.js` | 4 | PDF generation, pagination of very long content, only `http(s)` links are clickable, text normalisation and safe file names |
 
 **Manual verification during development** (scripts are not part of this repository):
@@ -410,7 +430,7 @@ Run these while the server is idle. Honouring a request also means removing the 
 - A loaded file lives in one browser tab. Very large files may not survive a reload (the page tells you).
 
 **General**
-- A single-user, local tool with no login or access control. Do not expose it to a network.
+- A single-user, local tool with no login or access control. Do not expose it to a network. For the same reason the **Vercel deployment is demo-only** (synthetic results, no keys, no live lookups); live research is not supported on a public URL.
 - PDF export uses built-in fonts, so characters outside Western European languages become `?`.
 - Cost and speed depend on your model provider: each research run makes about nine model calls and each draft one to three.
 
@@ -508,6 +528,10 @@ tools/
   import-prospects.js               Turns YOUR OWN CSV into a private data file (cleaning, exclusions)
   audit-log.js                      List, purge and erase audit-log entries
   check-email-live.js               Manual live check of the email writer
+  build-demo.js                     Builds the static demo site into public/ (whitelisted files only)
+api/                      Demo-only API functions for the hosted Vercel demo (always mock mode)
+vercel.json               Vercel build command, function time limit and security headers
+.vercelignore             Files never uploaded when deploying with the Vercel CLI
 tests/                    Automated tests (npm test)
 private/                  Git-ignored: keep real data and real company profiles here, on your machine only
 .env.example              Template for the keys you must supply yourself

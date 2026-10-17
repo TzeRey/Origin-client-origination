@@ -497,6 +497,8 @@ button { color: inherit; }
 .data-table .tone-bad { color: #fca5a5; }
 .data-problems { margin-top: 16px; padding: 12px 14px; border: 1px solid rgba(251, 191, 36, .35); border-radius: 12px; background: rgba(251, 191, 36, .06); color: #fde68a; font-size: 12.5px; }
 .data-problems ul { margin: 6px 0 0; padding-left: 18px; }
+.demo-banner { padding: 9px 20px; border-bottom: 1px solid rgba(251, 191, 36, .35); background: rgba(251, 191, 36, .1); color: #fde68a; font-size: 13px; text-align: center; }
+.demo-banner[hidden] { display: none; }
 .data-notice { display: inline-block; margin: 0 0 18px; padding: 8px 14px; border: 1px solid rgba(129, 140, 248, .4); border-radius: 10px; background: rgba(99, 102, 241, .1); color: #c7d2fe; font-size: 13px; }
 .d-btn-cta { border-color: transparent; background: #f1f5ff; color: #1e1b4b; font-weight: 700; }
 .d-btn-cta:hover:not(:disabled) { border-color: transparent; background: #ffffff; }

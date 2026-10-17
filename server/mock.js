@@ -25,7 +25,8 @@ const STEPS = [
 ];
 
 async function runMock(subject, emit, { signal } = {}) {
-  const speed = process.env.OUTREACH_MOCK_FAST === "1" ? 0 : 1;
+  const scale = Number(process.env.OUTREACH_MOCK_SPEED);
+  const speed = process.env.OUTREACH_MOCK_FAST === "1" ? 0 : scale > 0 ? scale : 1;
   const statuses = {};
   for (const [id, label, ms] of STEPS) {
     if (signal?.aborted) throw new Error("Cancelled");

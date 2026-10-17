@@ -28,5 +28,11 @@ desktop.ini
 tmp/
 coverage/
 
+# Generated static site for the hosted demo (tools/build-demo.js); Vercel builds it itself
+public/
+
+# Vercel CLI link folder
+.vercel/
+
 # Private local data (for example real company profiles). Never commit.
 private/

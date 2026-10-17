@@ -1,0 +1,13 @@
+# Files that must never be uploaded to Vercel when deploying with the CLI (git-based deploys use .gitignore).
+# Keep tools/ and server/: the build script and the demo API functions need them.
+private/
+.env
+.env.*
+!.env.example
+logs/
+tests/
+public/
+node_modules/
+.git/
+*.pdf
+*-dossier.json

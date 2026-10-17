@@ -101,6 +101,19 @@ function parseSubject(payload) {
 }
 
 async function readBody(req, limit = 20000) {
+  /* Some hosts (Vercel's Node runtime, for one) read and parse the body before the handler runs and expose it as req.body.
+   * Plain Node leaves req.body undefined, so the stream is read below. */
+  let pre;
+  try {
+    pre = req.body;
+  } catch {
+    throw Object.assign(new Error("Invalid JSON"), { status: 400 });
+  }
+  if (pre !== undefined && pre !== null) {
+    const text = Buffer.isBuffer(pre) ? pre.toString("utf8") : typeof pre === "string" ? pre : JSON.stringify(pre);
+    if (Buffer.byteLength(text) > limit) throw Object.assign(new Error("Payload too large"), { status: 413 });
+    return text;
+  }
   const chunks = [];
   let size = 0;
   for await (const chunk of req) {
@@ -111,10 +124,20 @@ async function readBody(req, limit = 20000) {
   return Buffer.concat(chunks).toString("utf8");
 }
 
+/* The request's Origin must be this same site. The scheme is ignored on purpose: behind HTTPS hosting the browser's Origin
+ * is https://... while this process only sees the Host header. */
+function sameSite(origin, host) {
+  try {
+    return new URL(origin).host.toLowerCase() === String(host || "").toLowerCase();
+  } catch {
+    return false;
+  }
+}
+
 /* Shared request guard for the POST APIs: same-origin only, and only from the app's own fetch calls. */
 function guardApiRequest(req, res) {
   const origin = req.headers.origin;
-  if (origin && origin !== `http://${req.headers.host}`) {
+  if (origin && !sameSite(origin, req.headers.host)) {
     sendJson(res, 403, { error: "Cross-origin requests are not allowed" });
     return false;
   }
@@ -226,14 +249,17 @@ function serveStatic(req, res, pathname) {
   });
 }
 
-const server = http.createServer((req, res) => {
+/* Routes one request. Used by the local server below and by the hosted demo's api/ functions. */
+function route(req, res) {
   const { pathname } = new URL(req.url, "http://localhost");
   if (pathname === "/api/health" && req.method === "GET") return sendJson(res, 200, health());
   if (pathname === "/api/outreach" && req.method === "POST") return handleOutreach(req, res);
   if (pathname === "/api/email-draft" && req.method === "POST") return handleEmailDraft(req, res);
   if (req.method === "GET" || req.method === "HEAD") return serveStatic(req, res, pathname);
   return sendJson(res, 405, { error: "Method not allowed" });
-});
+}
+
+const server = http.createServer(route);
 
 if (require.main === module) {
   server.on("error", (error) => {
@@ -251,4 +277,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { server, health, parseSubject };
+module.exports = { server, route, health, parseSubject, readBody, PUBLIC_FILES, SECURITY_HEADERS };
