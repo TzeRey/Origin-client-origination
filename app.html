@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1020" />
+    <meta name="description" content="Discover thoughtfully ranked private wealth prospects with explainable, after-tax equity estimates." />
+    <title>Origin App — Prospect intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="data-loader.js" defer></script>
+    <script src="equity-model.js" defer></script>
+    <script src="dossier.js" defer></script>
+    <script src="dossier-pdf.js" defer></script>
+    <script src="compose.js" defer></script>
+    <script src="app.js" defer></script>
+    <script src="data-upload.js" defer></script>
+  </head>
+  <body class="app-body">
+    <header class="app-header" id="appHeader">
+      <div class="wrap app-nav">
+        <a class="brand" href="index.html" aria-label="Origin home"><span class="brand-symbol" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>origin<span class="brand-period">.</span></span></a>
+        <nav class="app-links" aria-label="Main navigation">
+          <a class="is-active" href="#opportunities">Discover</a>
+          <a href="#methodology" id="methodNavLink">Methodology</a>
+          <a href="index.html">About Origin</a>
+        </nav>
+        <div class="app-actions">
+          <button class="icon-btn" type="button" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <i class="notif-dot"></i>
+          </button>
+          <button class="avatar-btn" type="button" aria-label="Your profile">JD</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="app-hero wrap" aria-labelledby="hero-title">
+        <div class="app-hero-copy">
+          <span class="pill"><i></i>Private wealth prospect intelligence</span>
+          <h1 class="client-intelligence-title" id="hero-title">The intelligence engine for private wealth <span>advisors in tech hubs.</span></h1>
+          <p class="hero-description">Surface leaders at high-growth AI and technology companies with potential equity-driven liquidity events. Connect career, company, and financial signals to after-tax equity scenarios, then prioritize prospects against onboarding thresholds and outreach fit.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#opportunities">Explore prospects <span aria-hidden="true">↓</span></a>
+            <a class="btn btn-ghost" href="#methodology" id="methodHeroLink">How estimates work</a>
+          </div>
+        </div>
+        <aside class="snapshot" id="snapshot" aria-label="Shortlist snapshot"></aside>
+      </section>
+
+      <section class="wrap" aria-label="How Origin builds a prospect signal">
+        <div class="intelligence-flow">
+          <div class="flow-heading"><span>From signal to priority</span><span>Modeled from public data · not verified net worth</span></div>
+          <div class="flow-steps">
+            <div class="flow-step"><span class="flow-step-icon">⌁</span><span><strong>Discover signals</strong><small>News · filings · GTM data</small></span></div>
+            <span class="flow-arrow" aria-hidden="true">→</span>
+            <div class="flow-step"><span class="flow-step-icon">◷</span><span><strong>Model equity</strong><small>Vesting · refresh · tenders</small></span></div>
+            <span class="flow-arrow" aria-hidden="true">→</span>
+            <div class="flow-step"><span class="flow-step-icon">↗</span><span><strong>Apply taxes</strong><small>Federal · state · local</small></span></div>
+            <span class="flow-arrow" aria-hidden="true">→</span>
+            <div class="flow-step"><span class="flow-step-icon">◎</span><span><strong>Prioritize outreach</strong><small>Minimum net equity · confidence</small></span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="discovery-section wrap" id="opportunities" aria-labelledby="discovery-title">
+        <div class="section-heading-row">
+          <div>
+            <span class="section-kicker">Prospect intelligence</span>
+            <h2 id="discovery-title">Potential liquidity prospects</h2>
+            <p class="section-subtitle">Sourced company signals, after-tax equity scenarios, and advisor-fit ranking.</p>
+          </div>
+          <div class="match-note"><span class="match-note-icon">✦</span><span><strong>Net equity ranking</strong><small>Est. after-tax equity · minimum threshold · confidence level</small></span></div>
+        </div>
+
+        <div class="discovery-toolbar" id="discoveryToolbar" hidden>
+          <div class="filter-list" role="group" aria-label="Filter by company">
+            <button class="filter-chip is-active" type="button" data-filter="All">All matches <span class="filter-total" id="matchCount">0</span></button>
+          </div>
+          <div class="toolbar-controls">
+            <button class="data-button" id="replaceProspects" type="button" title="Replace the prospects with another file">Replace prospects</button>
+            <button class="data-button" id="replaceProfiles" type="button" title="Replace the company profiles with another file">Replace company profiles</button>
+            <label class="threshold-box">
+              <span class="threshold-label">Min. net equity</span>
+              <select id="thresholdSelect" aria-label="Minimum estimated net equity after tax">
+                <option value="0">Any</option>
+                <option value="1000000">$1M+</option>
+                <option value="5000000">$5M+</option>
+                <option value="10000000">$10M+</option>
+                <option value="25000000">$25M+</option>
+                <option value="50000000">$50M+</option>
+              </select>
+            </label>
+            <label class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4.3 4.3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              <input id="searchInput" type="search" placeholder="Search for a client..." autocomplete="off" aria-label="Search prospects by name, company, or title" />
+              <span class="search-shortcut" aria-hidden="true">Ctrl K</span>
+            </label>
+          </div>
+        </div>
+
+        <section class="data-prompt" id="dataPrompt" aria-labelledby="dataPromptTitle">
+          <span class="data-prompt-kicker">Get started</span>
+          <h3 id="dataPromptTitle">Upload your data to see equity estimates</h3>
+          <p class="data-prompt-lede">Origin needs two files: your prospects, and the company details the equity model uses for each employer. Both are read right here in your browser. Nothing is uploaded, and the files are never run as code.</p>
+          <div class="upload-pair">
+            <section class="upload-slot" id="slotProspects" aria-labelledby="slotProspectsTitle">
+              <span class="slot-step" aria-hidden="true">1</span>
+              <h4 id="slotProspectsTitle">Prospects</h4>
+              <p class="slot-copy">The people to estimate: name, company, title and start date.</p>
+              <label class="dz dz-slot" id="dropProspects" for="fileProspects">
+                <strong>Choose a prospects file</strong>
+                <span>or drop it here (.js or .json, up to 5 MB)</span>
+                <input class="dz-input" id="fileProspects" type="file" accept=".js,.json,.txt,text/javascript,application/json" />
+              </label>
+              <p class="slot-status" id="statusProspects" role="status" hidden></p>
+              <a class="slot-link" href="templates/prospects-template.js" download="prospects-template.js">Download the prospects template</a>
+            </section>
+            <section class="upload-slot" id="slotProfiles" aria-labelledby="slotProfilesTitle">
+              <span class="slot-step" aria-hidden="true">2</span>
+              <h4 id="slotProfilesTitle">Company profiles</h4>
+              <p class="slot-copy">What the model needs for each employer: funding rounds, vesting, tender offers and pay levels.</p>
+              <label class="dz dz-slot" id="dropProfiles" for="fileProfiles">
+                <strong>Choose a company profiles file</strong>
+                <span>or drop it here (.js or .json, up to 5 MB)</span>
+                <input class="dz-input" id="fileProfiles" type="file" accept=".js,.json,.txt,text/javascript,application/json" />
+              </label>
+              <p class="slot-status" id="statusProfiles" role="status" hidden></p>
+              <a class="slot-link" href="templates/company-profiles-template.js" download="company-profiles-template.js">Download the company profiles template</a>
+            </section>
+          </div>
+          <button class="btn-continue" id="continueButton" type="button" hidden>Continue without company profiles <small>prospects will show n/a</small></button>
+          <p class="data-prompt-links"><a href="#methodology" id="promptMethod">How the estimates work</a></p>
+          <div class="data-prompt-or" aria-hidden="true"><span>or</span></div>
+          <button class="btn-sample" id="sampleButton" type="button">Try the sample data <small>14 fictional prospects</small></button>
+          <p class="c-form-error" id="promptError" role="alert" hidden></p>
+        </section>
+
+        <div class="card-loading" id="cardLoading" role="status" aria-live="polite" hidden>
+          <div class="local-loader-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+          <p class="local-loading-label">Analyzing prospect signals</p>
+          <p class="local-loading-caption">Connecting career timelines, equity assumptions, and liquidity scenarios…</p>
+        </div>
+
+        <div id="discoveryResults" hidden>
+          <div class="results-line"><span id="resultsText">0 qualified prospects</span><span class="results-line-fill"></span><button class="sort-button" id="sortButton" type="button">Net equity <span aria-hidden="true">⌄</span></button></div>
+          <div class="card-grid" id="cardGrid" aria-live="polite"></div>
+          <nav class="pagination" id="pagination" aria-label="Prospect pages" hidden></nav>
+          <div class="empty-state" id="emptyState" hidden><span class="empty-icon">✳</span><h3>No matches just yet</h3><p>Try another search or choose a different company.</p><button class="reset-button" id="resetButton" type="button">Clear filters</button></div>
+
+          <div class="end-note"><span>✳</span> The best partnerships start with a conversation <span>✳</span></div>
+        </div>
+              <details class="methodology" id="methodology">
+            <summary>How these estimates are built <span aria-hidden="true">+</span></summary>
+            <div class="methodology-body">
+              <p class="method-lede">Every figure is a <strong>model estimate from public data</strong>, not a verified holding, income or net worth. Grant sizes, tax situations and prior sales are not observable, so each card shows an after-tax range and a confidence level. <strong>The companies and figures in the sample data are made up and illustrative.</strong> Load your own company profiles for real estimates.</p>
+              <div class="method-grid">
+                <section>
+                  <h4>1 &middot; Grant size</h4>
+                  <p>Every company profile has a pay ladder: the average stock value per year at each level, times a 4-year grant. Titles are placed on that ladder by explicit rules (engineers, managers, directors, VPs), and non-engineering tracks such as sales, marketing and recruiting are scaled down because more of their pay is cash. Earlier hires are scaled down by (valuation at hire &divide; reference valuation)<sup>&alpha;</sup>, &alpha; &asymp; 0.30-0.65. A title that states a level on the ladder (for example "L5") is used directly.</p>
+                </section>
+                <section>
+                  <h4>2 &middot; Vesting &amp; refresh grants</h4>
+                  <p>Each profile sets its vesting schedule: the share that vests in each year and an optional cliff, vesting monthly in between. On every anniversary a refresh grant of 0-50% of the initial grant is added and vests on the same schedule; refresh grants typically make up 15-45% of vested value.</p>
+                </section>
+                <section>
+                  <h4>3 &middot; Share price</h4>
+                  <p>Price at each grant and vest date is interpolated between the profile's funding rounds. Today's mark is sampled between the profile's low and high price, so a range of outcomes is shown instead of a single number.</p>
+                </section>
+                <section>
+                  <h4>4 &middot; Trigger structure</h4>
+                  <p><strong>Double-trigger RSUs:</strong> time-vested units settle (and are taxed) only at a tender or IPO. <strong>Single-trigger RSUs:</strong> each tranche is taxed as ordinary income when it vests (shares withheld or sold to cover); later sales are taxed as capital gains on the appreciation since vest. Each profile says which applies.</p>
+                </section>
+                <section>
+                  <h4>5 &middot; Tender offers</h4>
+                  <p>Eligible holders (1+ year of service) sell part of their vested units in each tender listed in the profile, within the participation range and any per-person cap it states. Tender proceeds are taxed and counted as cash. A profile with no tenders assumes none.</p>
+                </section>
+                <section>
+                  <h4>6 &middot; Taxes</h4>
+                  <p>US resident in San Francisco assumed: ordinary income 37% federal + 2.35% Medicare + 13.3% California = 52.65%; capital gains 20% + 3.8% NIIT + 13.3% California = 37.1%; no local tax. Equity income stacks on salary, so top brackets apply. The headline figure is <strong>net</strong>: tender cash after tax plus remaining equity after a hypothetical sale today. A NYC profile is supported in the model.</p>
+                </section>
+                <section>
+                  <h4>7 &middot; Range &amp; confidence</h4>
+                  <p>1,500 scenarios per person vary stock level, &alpha;, refresh size, share price and tender participation. Cards show the median and P10-P90 range, which reflects assumption uncertainty and not a statistical guarantee. Confidence is "Medium" only when the role maps cleanly and the range is narrow.</p>
+                </section>
+                <section>
+                  <h4>Limitations</h4>
+                  <p>Titles and "seniority" in a data file can be wrong, and work location is unknown (e.g. a "Country Manager" may be based outside the US). Early hires often held larger stakes than pay benchmarks imply, and founders flagged in the data hold stakes that pay bands do not capture. Bands for non-engineering, director and VP roles are rougher estimates than the engineering levels. Records with an impossible start date, or at a company with no profile, are shown as "n/a" and are not estimated. Some names may be incomplete (an initial or a single name), so identity and sanctions screening is unreliable for them. Tender cash reinvestment, QSBS, AMT, donations, options vs RSUs and departures are not modeled.</p>
+                </section>
+              </div>
+              <p class="method-sources">Sources: the shipped company profiles are <strong>illustrative placeholders</strong>, not real market data. For real estimates, build profiles from sources you are licensed to use (funding-round prices, compensation benchmarks, company news) and load them with "Use your own data". Tender caps and trigger structures are assumptions unless you can verify them. This is not tax advice. Handle personal data in line with applicable privacy and marketing-consent rules.</p>
+            </div>
+          </details>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div class="wrap app-footer-inner"><a class="brand" href="index.html"><span class="brand-symbol" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>origin<span class="brand-period">.</span></span></a><span>Modeled estimates · not verified net worth</span><span>© 2026 Origin Studio</span></div>
+    </footer>
+
+    <dialog class="company-dialog" id="companyDialog" aria-labelledby="dialogName">
+      <button class="dialog-close" id="dialogClose" type="button" aria-label="Close details">×</button>
+      <div class="dialog-company-mark" id="dialogMark"></div>
+      <div class="dialog-industry" id="dialogIndustry"></div>
+      <h2 id="dialogName"></h2>
+      <p class="dialog-description" id="dialogDescription"></p>
+      <div class="dialog-equity" id="dialogEquity"></div>
+      <div class="dialog-divider"></div>
+      <div class="dialog-contact-label">Your way in</div>
+      <div class="dialog-contact" id="dialogContact"></div>
+      <button class="dialog-cta" id="initiateOutreach" type="button">Initiate outreach <span aria-hidden="true">↗</span></button>
+      <p class="outreach-note" id="outreachNote">Starts a research agent across the web, OpenSanctions and public court records. Public, professional sources only; it runs only when you press this button.</p>
+      <section class="dossier-card" id="dossierCard" aria-live="polite" hidden></section>
+    </dialog>
+
+    <dialog class="compose-dialog" id="composeDialog" aria-labelledby="composeTitle"></dialog>
+  </body>
+</html>

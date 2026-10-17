@@ -1,0 +1,15 @@
+{
+  "name": "origin-prospect-intelligence",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Origin prospect intelligence app with a local, key-safe outreach research agent",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server/server.js",
+    "start:mock": "node --env-file-if-exists=.env server/server.js --mock",
+    "audit": "node --env-file-if-exists=.env tools/audit-log.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22.9"
+  }
+}

@@ -1,0 +1,32 @@
+# ---------------------------------------------------------------------------
+# Secrets: never commit real keys. Copy .env.example to .env and fill it in.
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# Runtime output: the audit log records the names of prospects that were researched
+logs/
+*.log
+
+# Dependencies (this project has none at runtime; node_modules only appears if you add dev tooling)
+node_modules/
+
+# Generated files that can contain personal data about researched people
+*-dossier-*.pdf
+*-dossier.json
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+
+# Local scratch space and coverage output
+tmp/
+coverage/
+
+# Private local data (for example real company profiles). Never commit.
+private/
