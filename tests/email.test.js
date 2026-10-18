@@ -8,14 +8,14 @@ const http = require("node:http");
 process.env.OPENROUTER_API_KEY = "FAKE_OPENROUTER_KEY_FOR_TESTS_ONLY";
 process.env.OUTREACH_AUDIT_DIR = require("path").join(require("os").tmpdir(), "origin-test-audit");
 
-const { draftEmail, extractContext, validateDraft, assertCanContact } = require("../server/email");
+const { draftEmail, mockDraft, extractContext, validateDraft, assertCanContact, SYSTEM } = require("../server/email");
 const { server } = require("../server/server");
 
 const EMPLOYER = "Harbor & Pine Private Bank";
 
 const GOOD = {
   subject: "Would love to connect over coffee",
-  body: "Hi Jane,\n\nI hope your week is going well. I work in private banking at Harbor & Pine Private Bank with people in the tech industry, and I really enjoyed your essay on scaling research teams. It was a thoughtful read and it stayed with me.\n\nWould you be open to a relaxed coffee or a short call sometime in the next few weeks? There is no agenda beyond getting to know each other and swapping notes, and you are welcome to choose whatever time and format suit you.\n\nIf the timing is not right, no worries at all.\n\nWarm regards,",
+  body: "Hi Jane,\n\nI hope your week is going well. I work in private banking at Harbor & Pine Private Bank with people in the tech industry, and I really enjoyed your essay on scaling research teams. It was a thoughtful read and it stayed with me.\n\nWould you be open to a relaxed coffee or a short call sometime in the next few weeks? I'd enjoy getting to know you and hearing about your work, and I'm glad to share how I work with people in tech if that is ever useful. You are welcome to choose whatever time and format suit you.\n\nIf the timing is not right, no worries at all.\n\nWarm regards,",
   referenced: ["Essay on scaling research teams"]
 };
 
@@ -96,6 +96,76 @@ test("validator rejects pushy, wealth-related, placeholder and overlong drafts",
   assert.ok(bad("Hi Jane,\n\nToo short.\n\nWarm regards,").some((p) => /short/.test(p)));
   assert.ok(bad(`Hello team,\n\n${pad}\n\nWarm regards,`).some((p) => /greeting Jane/.test(p)));
   assert.ok(bad(`Hi Jane,\n\nWrite to me at me@bank.com.${pad}\n\nWarm regards,`).some((p) => /email address/.test(p)));
+});
+
+const NO_AGENDA_CLAIMS = [
+  "There is no agenda beyond getting to know each other.",
+  "I have no hidden agenda here.",
+  "No agenda, just a friendly chat.",
+  "I'm reaching out without any agenda.",
+  "I have no ulterior motive at all.",
+  "I'm not trying to sell you anything.",
+  "I am not selling anything, honestly.",
+  "This isn't a sales pitch.",
+  "This is not a pitch.",
+  "There is nothing to sell here.",
+  "It's purely social.",
+  "No strings attached, of course.",
+  "I promise there is no pitch."
+];
+
+test("the email may never claim there is 'no agenda' or nothing to sell: every such wording is rejected", () => {
+  const context = extractContext(dossier(), EMPLOYER);
+  const pad = " I work in private banking at Harbor & Pine Private Bank. Plain filler words that keep the message at a sensible length for a short friendly note to a busy person today.".repeat(2);
+  for (const claim of NO_AGENDA_CLAIMS) {
+    const problems = validateDraft({ subject: "Hello there", body: `Hi Jane,\n\n${claim}${pad}\n\nWarm regards,`, referenced: [] }, context);
+    assert.ok(problems.some((p) => /no agenda or no intent to sell/.test(p)), `should be rejected: ${claim}`);
+  }
+});
+
+test("honest wording is not flagged: wanting to get to know them, offering to share how you work, and 'no pressure'", () => {
+  const context = extractContext(dossier(), EMPLOYER);
+  const pad = " I work in private banking at Harbor & Pine Private Bank. Plain filler words that keep the message at a sensible length for a short friendly note to a busy person today.".repeat(2);
+  for (const line of [
+    "I'd enjoy getting to know you and hearing about your work.",
+    "I'm glad to share how I work with people in tech if that is ever useful.",
+    "No pressure at all, and no worries if the timing is not right.",
+    "Feel free to say no, and I will completely understand.",
+    "I'd love to hear what you are building."
+  ]) {
+    const problems = validateDraft({ subject: "Hello there", body: `Hi Jane,\n\n${line}${pad}\n\nWarm regards,`, referenced: [] }, context);
+    assert.ok(!problems.some((p) => /no agenda/.test(p)), `should be allowed: ${line}`);
+  }
+});
+
+test("a draft that claims 'no agenda' is retried with the reason, and the accepted draft is honest", async () => {
+  const dishonest = { ...GOOD, body: GOOD.body.replace("I'd enjoy getting to know you and hearing about your work", "There is no agenda beyond a friendly chat") };
+  assert.match(dishonest.body, /no agenda/);
+  stubModel([dishonest, GOOD]);
+  const draft = await draftEmail(dossier(), { employer: EMPLOYER });
+  assert.equal(requests.length, 2, "the first draft was rejected");
+  assert.match(requests[1].messages[1].content, /no agenda or no intent to sell/);
+  assert.doesNotMatch(draft.body, /agenda/i);
+});
+
+test("if the model keeps claiming it, the app shows an error instead of a dishonest email", async () => {
+  const dishonest = { ...GOOD, body: GOOD.body.replace("I'd enjoy getting to know you and hearing about your work", "There is no agenda here") };
+  stubModel([dishonest]);
+  await assert.rejects(() => draftEmail(dossier(), { employer: EMPLOYER }), (e) => e.status === 502 && /no agenda/.test(e.message));
+  assert.equal(requests.length, 3);
+});
+
+test("the instructions tell the model to be truthful about the purpose, and the demo drafts are honest too", () => {
+  assert.match(SYSTEM, /Be truthful about the purpose/);
+  assert.match(SYSTEM, /NEVER claim or imply that there is no agenda/);
+  assert.match(SYSTEM, /never pretend that hope does not exist/);
+  const context = extractContext(dossier(), EMPLOYER);
+  for (const variant of [0, 1]) {
+    const { body } = mockDraft(dossier(), { variant, employer: EMPLOYER });
+    assert.doesNotMatch(body, /agenda|nothing to sell|strings attached/i);
+    assert.ok(!validateDraft({ subject: "Hello", body, referenced: [] }, context).some((p) => /no agenda/.test(p)));
+    assert.match(body, /getting to know you/);
+  }
 });
 
 test("a rejected draft is retried with the reasons; success on the second attempt", async () => {

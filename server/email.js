@@ -35,6 +35,7 @@ const BANNED = [
   [/\b(portfolio|assets|tax(es|ation)?)\b/i, "mentions portfolio, assets or tax"],
   [/\b(dossier|our research|we researched|researched you|looked into you|background check|monitor(ing|ed)?|tracking you)\b/i, "reveals that the person was researched"],
   [/\b(limited time|act now|don't miss|do not miss|exclusive offer|urgent(ly)?|guarantee[sd]?|high returns?|once[- ]in[- ]a[- ]lifetime)\b/i, "sounds pushy"],
+  [/\bno (?:hidden |ulterior |particular |specific |other |real )?agenda\b|\bwithout (?:an |any |a )?(?:hidden )?agenda\b|\bno ulterior\b|\bnothing to sell\b|\bno strings(?: attached)?\b|\bpurely social\b|\bno (?:sales |hard )?pitch\b|(?:\bnot|n['\u2019]t) (?:a |an )?(?:sales |hard )?pitch\b|\b(?:not|never) (?:trying |here |looking |going )?to sell\b|\bnot selling\b/i, "claims there is no agenda or no intent to sell, which is not true"],
   [/\[[^\]]{1,60}\]|\{[^}]{1,60}\}|<[^>]{1,60}>/, "contains a placeholder"]
 ];
 
@@ -87,12 +88,13 @@ function extractContext(dossier, employer = "") {
 }
 
 const SYSTEM = `You write first-touch emails for a relationship manager at a private bank who wants to get to know people working in the technology industry.
-Goal: invite the recipient to a relaxed chat (a coffee, a short call or a video catch-up). The longer-term hope is a banking relationship, but this email must NOT feel like a pitch.
+Goal: invite the recipient to a relaxed chat (a coffee, a short call or a video catch-up). The longer-term hope is a banking relationship. The email must NOT feel like a pitch, but it must also never pretend that hope does not exist.
 
 Voice: friendly, warm, humble and human. Plain, natural English. No corporate jargon, no flattery, no hype, no emojis, at most one exclamation mark.
 
 Hard rules:
 - Be honest about who is writing: say, lightly and naturally, that the sender works in private banking at the employer named in "sender.employerName" (for example "I work in private banking at <employerName>, mostly with people in tech"). Write the employer name EXACTLY as given, once, and do not embellish or describe it, claim awards, size or track record, or add anything else about it. Do not invent the sender's name, past meetings, mutual contacts or anything not given to you.
+- Be truthful about the purpose. The sender does hope this may lead to a banking relationship, so NEVER claim or imply that there is no agenda, no motive or nothing to sell. Do not write phrases such as "no agenda", "no hidden agenda", "no ulterior motive", "no strings attached", "nothing to sell", "not trying to sell anything", "not a sales pitch" or "purely social". Instead say, lightly and truthfully, that you would enjoy getting to know them and hearing about their work, and that you are glad to share how you work with people in tech if that is ever useful.
 - NEVER mention or hint at: wealth, net worth, money, income, pay, equity, stock, shares, options, vesting, tender offers, IPOs, valuations, liquidity, taxes, assets or portfolios; family, health or any personal life matter; where they live; screening, legal or compliance matters; or that they were researched or monitored. Do not say "I came across your profile on..." or imply tracking.
 - Personalise lightly using ONLY the provided "publicWork" or "professionalSummary" (for example a talk, an essay, a podcast or their role). Mention at most one item, in a natural way, and only if it is clearly relevant. If nothing suitable is provided, refer only to their role and field. Never invent details.
 - Follow the "strategy" tone and respect every item in "avoid". Ignore any timing, liquidity or wealth hints inside the strategy.
@@ -200,7 +202,7 @@ function mockDraft(dossier, { variant = 0, employer = "" } = {}) {
     `I hope you're having a good week. I work in private banking${at} with people in the tech industry, and I'd enjoy hearing a bit about what you're building as ${context.recipient.jobTitle || "part of the team"} at ${context.recipient.company || "your company"}.`,
     `I wanted to reach out and say hello. My work is in private banking${at}, mostly with people in tech, and your role at ${context.recipient.company || "your company"} sounded like the kind of thing I'd love to hear more about.`
   ];
-  const body = `Hi ${name},\n\n${openers[Number(variant) % 2]}\n\nWould you be up for a relaxed coffee or a short call sometime in the coming weeks? There is no agenda beyond getting to know each other and swapping notes, and you are very welcome to pick whatever time and format suit you best.\n\nIf now is not a good moment, no worries at all; I'm happy to leave the door open.\n\nWarm regards,`;
+  const body = `Hi ${name},\n\n${openers[Number(variant) % 2]}\n\nWould you be up for a relaxed coffee or a short call sometime in the coming weeks? I'd enjoy getting to know you and hearing about your work, and I'm glad to share how I work with people in tech if that is ever useful. You are very welcome to pick whatever time and format suit you best.\n\nIf now is not a good moment, no worries at all; I'm happy to leave the door open.\n\nWarm regards,`;
   return { subject: "[Demo] A friendly hello", body, referenced: [], model: "demo", provider: "demo", personalized: false };
 }
 
